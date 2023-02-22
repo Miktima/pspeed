@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="{% static 'getdata/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'getdata/getdata.css' %}" rel="stylesheet">
+    <link rel="icon" href="{% static 'getdata/img/favicon.png' %}" type="image/png">    
+    <meta name="description" content="Результат работы утилиты PAGESPEED">
+    <title>Результат работы утилиты PAGESPEED</title>
+</head>
+<body class="bg-light">
+    <div class="container py-5 text-center"><div class="w-75">
+        <h1>Результат работы утилиты PAGESPEED</h1>
+        {% block content %}{% endblock %}
+        <div class="p-5"><div class="card"><div class="card-body text-start">
+            {% block description %}{% endblock %}
+        </div></div></div>
+        <div class="text-start pt-5"><a href = "{% block back_url %}/{% endblock %}" class="btn btn-info text-white">Назад</a></div>
+    </div></div>
+</body>
+</html>
