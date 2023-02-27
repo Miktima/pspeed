@@ -6,20 +6,44 @@
             {% if forloop.counter0|divisibleby:"2" %}<div class="row">{% endif %}
             <div class="col my-5">
                 <h5>{{name_metric}}</h5>
-                <div>{{value}}</div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
-                </svg>
-            <div class="progress-stacked">
+                <table class="table">
+                    <tr>
+                        <th>Границы (мс)</th><th>Распределение</th>
+                    </tr>
+                    {% for distro in value.distributions %}
+                    <tr class="{% cycle 'table-success' 'table-warning' 'table-danger' %}">
+                        {% if forloop.counter0 < 2 %}
+                            <td>{{distro.min}} - {{distro.max}}</td>
+                        {% else %}
+                            <td>{{distro.min}} - ...</td>
+                        {% endif %}
+                        <td>{{distro.proportion}}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr><th colspan="2">Процентиль</th></tr>
+                    <tr><td colspan="2"
+                        {% if value.percentile < value.distributions.0.max %}
+                            class = "table-success"
+                        {% elif value.percentile > value.distributions.2.min %}
+                            class = "table-danger"
+                        {% else %}
+                            class = "table-warning"
+                        {% endif %}>
+                        {{value.percentile}}
+                    </td></tr>
+                </table>
+                <div class="progress-stacked">
                     {% for distro in value.distributions %}
                         <div class="progress" role="progressbar" aria-label="Segment {{forloop.counter}}" 
                             aria-valuenow="{% widthratio distro.proportion 1 100 %}" aria-valuemin="0" aria-valuemax="100" 
                             style="width: {% widthratio distro.proportion 1 100 %}%">
-                            <div class="progress-bar {% cycle 'bg-success' 'bg-warning' 'bg-danger' %}  position-relative m-5">
-                                <span class="position-absolute top-100 start-0 translate-middle badge rounded-pill bg-secondary">{{distro.min}}</span>
-                            </div>
+                            <div class="progress-bar {% cycle 'bg-success' 'bg-warning' 'bg-danger' %} "></div>
                         </div>
                     {% endfor %}
+                </div>
+                <div class="position-relative">
+                    <div class="position-absolute top-0 start-0">0</div>
+                    <div class="position-absolute top-0 end-0">{{value.distributions.2.min}} мс</div>
                 </div>                
             </div>
             {% if forloop.counter|divisibleby:"2" %}</div>{% endif %}
@@ -31,17 +55,44 @@
             {% if forloop.counter0|divisibleby:"2" %}<div class="row">{% endif %}
             <div class="col my-5">
                 <h5>{{name_metric}}</h5>
-                <div>{{value}}</div>
+                <table class="table">
+                    <tr>
+                        <th>Границы (мс)</th><th>Распределение</th>
+                    </tr>
+                    {% for distro in value.distributions %}
+                    <tr class="{% cycle 'table-success' 'table-warning' 'table-danger' %}">
+                        {% if forloop.counter0 < 2 %}
+                            <td>{{distro.min}} - {{distro.max}}</td>
+                        {% else %}
+                            <td>{{distro.min}} - ...</td>
+                        {% endif %}
+                        <td>{{distro.proportion}}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr><th colspan="2">Процентиль</th></tr>
+                    <tr><td colspan="2"
+                        {% if value.percentile < value.distributions.0.max %}
+                            class = "table-success"
+                        {% elif value.percentile > value.distributions.2.min %}
+                            class = "table-danger"
+                        {% else %}
+                            class = "table-warning"
+                        {% endif %}>
+                        {{value.percentile}}
+                    </td></tr>
+                </table>
                 <div class="progress-stacked">
                     {% for distro in value.distributions %}
                         <div class="progress" role="progressbar" aria-label="Segment {{forloop.counter}}" 
                             aria-valuenow="{% widthratio distro.proportion 1 100 %}" aria-valuemin="0" aria-valuemax="100" 
                             style="width: {% widthratio distro.proportion 1 100 %}%">
-                            <div class="progress-bar {% cycle 'bg-success' 'bg-warning' 'bg-danger' %} position-relative">
-                                <span class="position-absolute top-100 start-100 translate-middle badge rounded-pill bg-secondary">{{distro.min}}</span>
-                            </div>
+                            <div class="progress-bar {% cycle 'bg-success' 'bg-warning' 'bg-danger' %}"></div>
                         </div>
                     {% endfor %}
+                </div>
+                <div class="position-relative">
+                    <div class="position-absolute top-0 start-0">0</div>
+                    <div class="position-absolute top-0 end-0">{{value.distributions.2.min}} мс</div>
                 </div>                
             </div>
             {% if forloop.counter|divisibleby:"2" %}</div>{% endif %}

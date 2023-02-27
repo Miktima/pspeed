@@ -24,10 +24,12 @@ def results(request):
         return HttpResponseRedirect(reverse('index'))
     else:
         ps = PageSpeed(portal_obj.url)
-        ps.get_result()
+        res = ps.get_result()
+        if res == False:
+            messages.error(request, ps.error)
+            return HttpResponseRedirect(reverse('index'))
         context = {
             "lE_metrics": ps.lE_metrics,
             "olE_metrics": ps.olE_metrics,
         }
         return render(request, 'getdata/results.html', context)    
-    return render(request)
