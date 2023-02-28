@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Sputnik
+from .models import Sputnik, Data
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -28,8 +28,13 @@ def results(request):
         if res == False:
             messages.error(request, ps.error)
             return HttpResponseRedirect(reverse('index'))
+        saved_data = Data.objects.filter(site=portal_obj).count()
         context = {
-            "lE_metrics": ps.lE_metrics,
-            "olE_metrics": ps.olE_metrics,
+            "lE_metrics_desktop": ps.lE_metrics_desktop,
+            "olE_metrics_desktop": ps.olE_metrics_desktop,
+            "lE_metrics_mobile": ps.lE_metrics_mobile,
+            "olE_metrics_mobile": ps.olE_metrics_mobile,
+            "portal": portal_obj,
+            "saved_data": saved_data
         }
         return render(request, 'getdata/results.html', context)    
