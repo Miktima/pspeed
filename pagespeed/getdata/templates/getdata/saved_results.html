@@ -1,0 +1,18 @@
+{% extends "getdata/base_results.html" %}
+{% block content %}
+    <div class="container text-center">
+        <h2>{{portal.url}}</h2>
+        <div class="p-3"><img src="data:image/png;base64,{{FCPimage}}" /></div>
+        <div class="p-3"><img src="data:image/png;base64,{{FIDimage}}" /></div>
+        <div class="p-3"><img src="data:image/png;base64,{{LCPimage}}" /></div>
+    </div>
+{% endblock %}
+{% block description %}
+<ul>
+    <li>FIRST_CONTENTFUL_PAINT_MS - первая отрисовка контента. Измеряет, сколько времени требуется для визуализации исходного содержимого DOM, 
+        но не фиксирует, сколько времени потребовалось для визуализации самого большого (обычно более значимого) содержимого на странице</li>
+    <li>FIRST_INPUT_DELAY_MS - Время ожидания для первого взаимодействия с контентом.</li>
+    <li>LARGEST_CONTENTFUL_PAINT_MS - скорость загрузки основного контента. Измеряет время, за которое становится видимым самый большой элемент контента в области просмотра.</li>
+</ul>
+{% endblock %}
+{% block back_url %}{% url 'index' %}{% endblock %}

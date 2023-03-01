@@ -5,26 +5,52 @@
         <div class="row">
             <div class="col m-3">
                 {% if saved_data > 1 %}
-                    <a class="btn btn-primary" href="#" role="button">Сохраненные данные</a>
+                    <a class="btn btn-primary" href="{% url 'saved_results' portal.id %}" role="button">Сохраненные данные</a>
                 {% endif %}
             </div>
             <div class="col m-3">
-                <form>
-                    <input type="hidden" name="lE_metrics_desktop" value="{{lE_metrics_desktop}}">
-                    <input type="hidden" name="olE_metrics_desktop" value="{{olE_metrics_desktop}}">
-                    <input type="hidden" name="lE_metrics_mobile" value="{{lE_metrics_mobile}}">
-                    <input type="hidden" name="olE_metrics_mobile" value="{{olE_metrics_mobile}}">
-                    <input type="hidden" name="portal" value="{{portal.id}}">
+                <form method="post" id="save_form">
+                    {% csrf_token %}
+                    <input type="hidden" name="lE_metrics_desktop" id="le_desktop" value="{{lE_metrics_desktop}}">
+                    <input type="hidden" name="olE_metrics_desktop" id="ole_desktop" value="{{olE_metrics_desktop}}">
+                    <input type="hidden" name="lE_metrics_mobile" id="le_mobile" value="{{lE_metrics_mobile}}">
+                    <input type="hidden" name="olE_metrics_mobile" id="ole_mobile" value="{{olE_metrics_mobile}}">
+                    <input type="hidden" name="portal" id="idportal" value="{{portal.id}}">
                     <button class="btn btn-primary" type="submit">Сохранить данные</button>
                 </form>
+                <script type="text/javascript">
+                    $("#save_form").on('submit', function(e){
+                        console.log("Test!!!");
+                        e.preventDefault();
+                    //    $.ajax({
+                    //        type:'POST',
+                    //        url:'{% url "save_data" %}',
+                    //        data:
+                    //        {
+                    //            le_metrics_desktop: $("#le_desktop").val(),
+                    //            ole_metrics_desktop: $("#ole_desktop").val(),
+                    //            le_metrics_mobile: $("#le_mobile").val(),
+                    //            ole_metrics_mobile: $("#ole_mobile").val(),
+                    //            portal: $("#idportal").val(),
+                    //            csrfmiddlewaretoken: '{{ csrf_token }}',
+                    //        },
+                    //        success:function(){
+                    //              alert('Данные сохранены');
+                    //                },
+                    //        error : function(xhr,errmsg,err) {
+                    //            console.log(xhr.status + ": " + xhr.responseText); 
+                    //               },                            
+                    //        });
+                        });
+                </script>                
             </div>
         </div>
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <ul class="nav nav-pills mb-3" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="desktop-tab" data-bs-toggle="tab" data-bs-target="#desktop-tab-pane" type="button" role="tab" aria-controls="desktop-tab-pane" aria-selected="true">Desktop</button>
+                <button class="nav-link active" id="desktop-tab" data-bs-toggle="pill" data-bs-target="#desktop-tab-pane" type="button" role="tab" aria-controls="desktop-tab-pane" aria-selected="true">Desktop</button>
               </li>
               <li class="nav-item" role="presentation">
-                <button class="nav-link" id="mobile-tab" data-bs-toggle="tab" data-bs-target="#mobile-tab-pane" type="button" role="tab" aria-controls="mobile-tab-pane" aria-selected="false">Mobile</button>
+                <button class="nav-link" id="mobile-tab" data-bs-toggle="pill" data-bs-target="#mobile-tab-pane" type="button" role="tab" aria-controls="mobile-tab-pane" aria-selected="false">Mobile</button>
               </li>
         </ul>
         <div class="tab-content" id="myTabContent">
@@ -225,7 +251,7 @@
 {% endblock %}
 {% block description %}
 <ul>
-    <li>FIRST_CONTENTFUL_PAINT_MS - первая отрисовка контента. измеряет, сколько времени требуется для визуализации исходного содержимого DOM, 
+    <li>FIRST_CONTENTFUL_PAINT_MS - первая отрисовка контента. Измеряет, сколько времени требуется для визуализации исходного содержимого DOM, 
         но не фиксирует, сколько времени потребовалось для визуализации самого большого (обычно более значимого) содержимого на странице</li>
     <li>FIRST_INPUT_DELAY_MS - Время ожидания для первого взаимодействия с контентом.</li>
     <li>LARGEST_CONTENTFUL_PAINT_MS - скорость загрузки основного контента. Измеряет время, за которое становится видимым самый большой элемент контента в области просмотра.</li>

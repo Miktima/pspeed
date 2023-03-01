@@ -6,7 +6,7 @@ class Sputnik (models.Model):
 
 class Data (models.Model):
     site = models.ForeignKey(Sputnik, on_delete=models.DO_NOTHING)
-    time = models.DateTimeField()
+    time = models.DateTimeField(auto_now_add=True)
     dataLEDesktop = models.JSONField()
     dataOLEDesktop = models.JSONField()
     dataLEMobile = models.JSONField()
