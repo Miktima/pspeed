@@ -24,27 +24,37 @@ class PageSpeed:
             }
         response = requests.get(self.serviceUrl, params=params)
         rdict = response.json()
-        if "loadingExperience" in rdict:
+        # Для некторых сайтов метрики могут не возвращаться
+        try:
             self.lE_metrics_desktop = rdict["loadingExperience"]["metrics"]
-            self.olE_metrics_desktop = rdict["originLoadingExperience"]["metrics"]
-            # На всякий случай ждем 5 секунд пока нет ключа
-            time.sleep(5)
-            # Получаем метрики для mobile
-            params = {
-                'url': self.portal,
-                'category': 'performance',
-                'strategy': 'mobile'
-                }
-            response = requests.get(self.serviceUrl, params=params)
-            rdict = response.json()
-            if "loadingExperience" in rdict:
-                self.lE_metrics_mobile = rdict["loadingExperience"]["metrics"]
-                self.olE_metrics_mobile = rdict["originLoadingExperience"]["metrics"]
-                return True
-            else: 
-                self.error = "Метрики для мобильных устройств отсутствуют"
-                return False
-        else:
+        except KeyError:
             self.error = "Метрики для настольных браузеров отсутствуют"
             return False
+        try:            
+            self.olE_metrics_desktop = rdict["originLoadingExperience"]["metrics"]
+        except KeyError:
+            self.error = "Метрики для настольных браузеров отсутствуют"
+            return False
+        # На всякий случай ждем 5 секунд пока нет ключа
+        time.sleep(5)
+        # Получаем метрики для mobile
+        params = {
+            'url': self.portal,
+            'category': 'performance',
+            'strategy': 'mobile'
+            }
+        response = requests.get(self.serviceUrl, params=params)
+        rdict = response.json()
+        try:
+            self.lE_metrics_mobile = rdict["loadingExperience"]["metrics"]
+        except KeyError:
+            self.error = "Метрики для мобильных устройств отсутствуют"
+            return False
+        try:
+            self.olE_metrics_mobile = rdict["originLoadingExperience"]["metrics"]
+        except KeyError:
+            self.error = "Метрики для мобильных устройств отсутствуют"
+            return False
+        return True
+
 

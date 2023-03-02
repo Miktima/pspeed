@@ -11,36 +11,36 @@
             <div class="col m-3">
                 <form method="post" id="save_form">
                     {% csrf_token %}
-                    <input type="hidden" name="lE_metrics_desktop" id="le_desktop" value="{{lE_metrics_desktop}}">
-                    <input type="hidden" name="olE_metrics_desktop" id="ole_desktop" value="{{olE_metrics_desktop}}">
-                    <input type="hidden" name="lE_metrics_mobile" id="le_mobile" value="{{lE_metrics_mobile}}">
-                    <input type="hidden" name="olE_metrics_mobile" id="ole_mobile" value="{{olE_metrics_mobile}}">
+                    <input type="hidden" name="le_metrics_desktop" id="le_desktop" value="{{lE_metrics_desktop}}">
+                    <input type="hidden" name="ole_metrics_desktop" id="ole_desktop" value="{{olE_metrics_desktop}}">
+                    <input type="hidden" name="le_metrics_mobile" id="le_mobile" value="{{lE_metrics_mobile}}">
+                    <input type="hidden" name="ole_metrics_mobile" id="ole_mobile" value="{{olE_metrics_mobile}}">
                     <input type="hidden" name="portal" id="idportal" value="{{portal.id}}">
-                    <button class="btn btn-primary" type="submit">Сохранить данные</button>
+                    <button class="btn btn-primary" type="submit" id="save_btn">Сохранить данные</button>
                 </form>
                 <script type="text/javascript">
                     $("#save_form").on('submit', function(e){
-                        console.log("Test!!!");
                         e.preventDefault();
-                    //    $.ajax({
-                    //        type:'POST',
-                    //        url:'{% url "save_data" %}',
-                    //        data:
-                    //        {
-                    //            le_metrics_desktop: $("#le_desktop").val(),
-                    //            ole_metrics_desktop: $("#ole_desktop").val(),
-                    //            le_metrics_mobile: $("#le_mobile").val(),
-                    //            ole_metrics_mobile: $("#ole_mobile").val(),
-                    //            portal: $("#idportal").val(),
-                    //            csrfmiddlewaretoken: '{{ csrf_token }}',
-                    //        },
-                    //        success:function(){
-                    //              alert('Данные сохранены');
-                    //                },
-                    //        error : function(xhr,errmsg,err) {
-                    //            console.log(xhr.status + ": " + xhr.responseText); 
-                    //               },                            
-                    //        });
+                        $.ajax({
+                            type:'POST',
+                            url:'{% url "save_data" %}',
+                            data:
+                            {
+                                le_metrics_desktop: $("#le_desktop").val(),
+                                ole_metrics_desktop: $("#ole_desktop").val(),
+                                le_metrics_mobile: $("#le_mobile").val(),
+                                ole_metrics_mobile: $("#ole_mobile").val(),
+                                portal: $("#idportal").val(),
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                            },
+                            success:function(){
+                                        $("#save_btn").text("Данные сохранены");
+                                        $("#save_btn").prop('disabled', true);
+                                    },
+                            error : function(xhr,errmsg,err) {
+                                        console.log(xhr.status + ": " + xhr.responseText); 
+                                   },                            
+                            });
                         });
                 </script>                
             </div>

@@ -142,10 +142,10 @@ def save_data(request):
         portal_id = request.POST["portal"]
         portal_row = Sputnik.objects.get(id=portal_id)
         data = Data(
-            dataLEDesktop=request.POST["lE_metrics_desktop"],
-            dataOLEDesktop=request.POST["olE_metrics_desktop"],
-            dataLEMobile=request.POST["lE_metrics_mobile"],
-            dataOLEMobile=request.POST["olE_metrics_mobile"],
+            dataLEDesktop=request.POST["le_metrics_desktop"],
+            dataOLEDesktop=request.POST["ole_metrics_desktop"],
+            dataLEMobile=request.POST["le_metrics_mobile"],
+            dataOLEMobile=request.POST["ole_metrics_mobile"],
             site=portal_row
         )
         data.save()
