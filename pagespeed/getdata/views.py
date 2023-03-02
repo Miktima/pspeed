@@ -3,7 +3,9 @@ from .models import Sputnik, Data
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.db.models import Count
 from .PageSpeed import PageSpeed
+import json
 
 from io import BytesIO
 import base64
@@ -16,9 +18,11 @@ import matplotlib.dates as mdates
 def index(request):
     # Выбираем список порталов
     portal_list = Sputnik.objects.all()
+    p = len(Data.objects.all().annotate(Count('site_id', distinct=True)))
     # Заполняем списки для выбора даты
     context = {
         'portal_list': portal_list,
+        'num_saved_portals': p,
     }
     return render(request, "getdata/index.html", context=context)
 
@@ -150,3 +154,36 @@ def save_data(request):
         )
         data.save()
         return render(request, 'getdata/results.html')
+    
+def sputnik_results(request):
+    LCP_desktop = []
+    LCP_mobile = []
+    sputnik = []
+    # Заполняем списки для каждого портала. Берем последнее измерение
+    portal = Sputnik.objects.values("id", "url")
+    for value in portal:
+        data = Data.objects.filter(site_id=value.get("id")).order_by('-time').first()
+        if data != None:
+            sputnik.append((value.get("url")).replace("https://", ""))
+            clear_string = (data.dataLEDesktop).replace("\'", "\"")                                                        
+            dataLEDesktop = json.loads(clear_string)
+            LCP_desktop.append(dataLEDesktop["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+            clear_string = (data.dataLEMobile).replace("\'", "\"")                                                        
+            dataLEMobile = json.loads(clear_string)
+            LCP_mobile.append(dataLEMobile["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+    # График LARGEST_CONTENTFUL_PAINT_MS для Desktop
+    fig, ax = plt.subplots(figsize=(7, 7), layout='constrained')
+    ax.scatter(sputnik, LCP_desktop, facecolor='r', edgecolor='k')
+    ax.set_title("LARGEST_CONTENTFUL_PAINT_MS для Desktop")
+    ax.set_ylabel("мс")
+    ax.grid(True) 
+    for label in ax.get_xticklabels():
+        label.set(rotation=90, horizontalalignment='center')
+    imgLCP_desktop_in_memory = BytesIO()
+    plt.savefig(imgLCP_desktop_in_memory, format="png")
+    LCP_desktop_image = base64.b64encode(imgLCP_desktop_in_memory.getvalue()).decode()
+    plt.clf()
+    context = {
+        "LCP_desktop_image": LCP_desktop_image,
+    }
+    return render(request, 'getdata/sputnik_results.html', context)

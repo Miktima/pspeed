@@ -25,6 +25,13 @@
     </table>
     <input type="submit" value="Submit">
 </form>
+{% if num_saved_portals > 1 %}
+<div class="row">
+    <div class="col m-3">
+            <a class="btn btn-primary" href="{% url 'sputnik_results'%}" role="button">Последние данные по Спутникам</a>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 {% block back %}
 {% endblock %}
