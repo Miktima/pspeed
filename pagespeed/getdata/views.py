@@ -164,7 +164,9 @@ def sputnik_results(request):
     for value in portal:
         data = Data.objects.filter(site_id=value.get("id")).order_by('-time').first()
         if data != None:
-            sputnik.append((value.get("url")).replace("https://", ""))
+            sputnik_name = (value.get("url")).replace("https://", "")
+            sputnik_name = sputnik_name.replace("/", "")
+            sputnik.append(sputnik_name)
             clear_string = (data.dataLEDesktop).replace("\'", "\"")                                                        
             dataLEDesktop = json.loads(clear_string)
             LCP_desktop.append(dataLEDesktop["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
@@ -176,6 +178,7 @@ def sputnik_results(request):
     ax.scatter(sputnik, LCP_desktop, facecolor='r', edgecolor='k')
     ax.set_title("LARGEST_CONTENTFUL_PAINT_MS для Desktop")
     ax.set_ylabel("мс")
+    ax.hlines(2500, 0, len(sputnik), colors="g")
     ax.grid(True) 
     for label in ax.get_xticklabels():
         label.set(rotation=90, horizontalalignment='center')
@@ -183,7 +186,21 @@ def sputnik_results(request):
     plt.savefig(imgLCP_desktop_in_memory, format="png")
     LCP_desktop_image = base64.b64encode(imgLCP_desktop_in_memory.getvalue()).decode()
     plt.clf()
+    # График LARGEST_CONTENTFUL_PAINT_MS для Mobile
+    fig, ax = plt.subplots(figsize=(7, 7), layout='constrained')
+    ax.scatter(sputnik, LCP_mobile, facecolor='r', edgecolor='k')
+    ax.set_title("LARGEST_CONTENTFUL_PAINT_MS для Mobile")
+    ax.set_ylabel("мс")
+    ax.hlines(2500, 0, len(sputnik), colors="g")
+    ax.grid(True) 
+    for label in ax.get_xticklabels():
+        label.set(rotation=90, horizontalalignment='center')
+    imgLCP_mobile_in_memory = BytesIO()
+    plt.savefig(imgLCP_mobile_in_memory, format="png")
+    LCP_mobile_image = base64.b64encode(imgLCP_mobile_in_memory.getvalue()).decode()
+    plt.clf()
     context = {
         "LCP_desktop_image": LCP_desktop_image,
+        "LCP_mobile_image": LCP_mobile_image,
     }
     return render(request, 'getdata/sputnik_results.html', context)
