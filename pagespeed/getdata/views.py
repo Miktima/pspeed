@@ -53,38 +53,44 @@ def results(request):
         return render(request, 'getdata/results.html', context)    
 
 def saved_results(request, portal_id):
-    data = Data.objects.filter(sputnik__id=portal_id)
+    data = Data.objects.filter(site_id=portal_id)
     portal = Sputnik.objects.get(id=portal_id)
     timestamps = data.values_list('time', flat=True)
     # Заполняем листы значениями (пока только тремя из шести)
     data_le_desktop_FCP = []
     data_le_desktop_FID = []
-    data_le_desktop_LCP = []
-    for d in data.values_list('dataLEDesktop', flat=True):
-        data_le_desktop_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
-        data_le_desktop_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
-        data_le_desktop_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+    data_le_desktop_LCP = []                                                     
+    for d in data.values_list("dataLEDesktop", flat=True):
+        clear_string = d.replace("\'", "\"")
+        d_json = json.loads(clear_string)
+        data_le_desktop_FCP.append(d_json["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_le_desktop_FID.append(d_json["FIRST_INPUT_DELAY_MS"]["percentile"])
+        data_le_desktop_LCP.append(d_json["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
     data_ole_desktop_FCP = []
     data_ole_desktop_FID = []
     data_ole_desktop_LCP = []
-    for d in data.values_list('dataLEDesktop', flat=True):
-        data_ole_desktop_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
-        data_ole_desktop_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
-        data_ole_desktop_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+    for d in data.values_list('dataOLEDesktop', flat=True):
+        clear_string = d.replace("\'", "\"")
+        d_json = json.loads(clear_string)
+        data_ole_desktop_FCP.append(d_json["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_ole_desktop_FID.append(d_json["FIRST_INPUT_DELAY_MS"]["percentile"])
+        data_ole_desktop_LCP.append(d_json["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
     data_le_mobile_FCP = []
     data_le_mobile_FID = []
     data_le_mobile_LCP = []
     for d in data.values_list('dataLEMobile', flat=True):
-        data_le_mobile_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
-        data_le_mobile_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
-        data_le_mobile_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+        clear_string = d.replace("\'", "\"")
+        d_json = json.loads(clear_string)
+        data_le_mobile_FCP.append(d_json["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_le_mobile_FID.append(d_json["FIRST_INPUT_DELAY_MS"]["percentile"])
+        data_le_mobile_LCP.append(d_json["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
     data_ole_mobile_FCP = []
     data_ole_mobile_FID = []
     data_ole_mobile_LCP = []
-    for d in data.values_list('dataLEMobile', flat=True):
-        data_ole_mobile_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
-        data_ole_mobile_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
-        data_ole_mobile_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+    for d in data.values_list('dataOLEMobile', flat=True):
+        data_ole_mobile_FCP.append(d_json["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_ole_mobile_FID.append(d_json["FIRST_INPUT_DELAY_MS"]["percentile"])
+        data_ole_mobile_LCP.append(d_json["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
     # Определение тиков для оси ординат (дат)
     locator = mdates.AutoDateLocator(minticks=5, maxticks=9)
     formatter = mdates.ConciseDateFormatter(locator)
