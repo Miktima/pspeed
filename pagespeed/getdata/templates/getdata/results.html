@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col m-3">
                 {% if saved_data > 1 %}
-                    <a class="btn btn-primary" href="{% url 'saved_results' portal.id %}" role="button">Сохраненные данные</a>
+                    <a class="btn btn-primary" href="{% url 'saved_results' portal.id %}" role="button">Данные по порталу</a>
                 {% endif %}
             </div>
             <div class="col m-3">
@@ -38,7 +38,7 @@
                                         $("#save_btn").prop('disabled', true);
                                     },
                             error : function(xhr,errmsg,err) {
-                                        console.log(xhr.status + ": " + xhr.responseText); 
+                                        alert(xhr.status + ": " + xhr.responseText); 
                                    },                            
                             });
                         });

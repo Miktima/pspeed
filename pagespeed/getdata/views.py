@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.db.models import Count
 from .PageSpeed import PageSpeed
+from .forms import DataForm
 import json
 
 from io import BytesIO
@@ -61,36 +62,30 @@ def saved_results(request, portal_id):
     data_le_desktop_FID = []
     data_le_desktop_LCP = []                                                     
     for d in data.values_list("dataLEDesktop", flat=True):
-        clear_string = d.replace("\'", "\"")
-        d_json = json.loads(clear_string)
-        data_le_desktop_FCP.append(d_json["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
-        data_le_desktop_FID.append(d_json["FIRST_INPUT_DELAY_MS"]["percentile"])
-        data_le_desktop_LCP.append(d_json["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_le_desktop_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_le_desktop_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
+        data_le_desktop_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
     data_ole_desktop_FCP = []
     data_ole_desktop_FID = []
     data_ole_desktop_LCP = []
     for d in data.values_list('dataOLEDesktop', flat=True):
-        clear_string = d.replace("\'", "\"")
-        d_json = json.loads(clear_string)
-        data_ole_desktop_FCP.append(d_json["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
-        data_ole_desktop_FID.append(d_json["FIRST_INPUT_DELAY_MS"]["percentile"])
-        data_ole_desktop_LCP.append(d_json["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_ole_desktop_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_ole_desktop_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
+        data_ole_desktop_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
     data_le_mobile_FCP = []
     data_le_mobile_FID = []
     data_le_mobile_LCP = []
     for d in data.values_list('dataLEMobile', flat=True):
-        clear_string = d.replace("\'", "\"")
-        d_json = json.loads(clear_string)
-        data_le_mobile_FCP.append(d_json["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
-        data_le_mobile_FID.append(d_json["FIRST_INPUT_DELAY_MS"]["percentile"])
-        data_le_mobile_LCP.append(d_json["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_le_mobile_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_le_mobile_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
+        data_le_mobile_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
     data_ole_mobile_FCP = []
     data_ole_mobile_FID = []
     data_ole_mobile_LCP = []
     for d in data.values_list('dataOLEMobile', flat=True):
-        data_ole_mobile_FCP.append(d_json["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
-        data_ole_mobile_FID.append(d_json["FIRST_INPUT_DELAY_MS"]["percentile"])
-        data_ole_mobile_LCP.append(d_json["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_ole_mobile_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
+        data_ole_mobile_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
+        data_ole_mobile_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
     # Определение тиков для оси ординат (дат)
     locator = mdates.AutoDateLocator(minticks=5, maxticks=9)
     formatter = mdates.ConciseDateFormatter(locator)
@@ -148,18 +143,23 @@ def saved_results(request, portal_id):
     return render(request, 'getdata/saved_results.html', context)
 
 def save_data(request):
+    form = DataForm(request.POST)
     if request.method == 'POST':
-        portal_id = request.POST["portal"]
-        portal_row = Sputnik.objects.get(id=portal_id)
-        data = Data(
-            dataLEDesktop=request.POST["le_metrics_desktop"],
-            dataOLEDesktop=request.POST["ole_metrics_desktop"],
-            dataLEMobile=request.POST["le_metrics_mobile"],
-            dataOLEMobile=request.POST["ole_metrics_mobile"],
-            site=portal_row
-        )
-        data.save()
-        return render(request, 'getdata/results.html')
+        if form.is_valid():
+            portal_id = form.clean_portalid("portal")
+            portal_row = Sputnik.objects.get(id=portal_id)
+            data = Data(
+                dataLEDesktop=form.clean_jsonfield("le_metrics_desktop", "loadingExperience"),
+                dataOLEDesktop=form.clean_jsonfield("ole_metrics_desktop", "originLoadingExperience"),
+                dataLEMobile=form.clean_jsonfield("le_metrics_mobile", "loadingExperience"),
+                dataOLEMobile=form.clean_jsonfield("ole_metrics_mobile", "originLoadingExperience"),
+                site=portal_row
+            )
+            data.save()
+            return render(request, 'getdata/results.html')
+        else:
+            print(form.errors)
+            return render(request, 'getdata/results.html')
     
 def sputnik_results(request):
     LCP_desktop = []
@@ -173,12 +173,8 @@ def sputnik_results(request):
             sputnik_name = (value.get("url")).replace("https://", "")
             sputnik_name = sputnik_name.replace("/", "")
             sputnik.append(sputnik_name)
-            clear_string = (data.dataLEDesktop).replace("\'", "\"")                                                        
-            dataLEDesktop = json.loads(clear_string)
-            LCP_desktop.append(dataLEDesktop["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
-            clear_string = (data.dataLEMobile).replace("\'", "\"")                                                        
-            dataLEMobile = json.loads(clear_string)
-            LCP_mobile.append(dataLEMobile["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+            LCP_desktop.append(data.dataLEDesktop["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
+            LCP_mobile.append(data.dataLEMobile["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
     # График LARGEST_CONTENTFUL_PAINT_MS для Desktop
     fig, ax = plt.subplots(figsize=(7, 7), layout='constrained')
     ax.scatter(sputnik, LCP_desktop, facecolor='r', edgecolor='k')
@@ -210,3 +206,4 @@ def sputnik_results(request):
         "LCP_mobile_image": LCP_mobile_image,
     }
     return render(request, 'getdata/sputnik_results.html', context)
+

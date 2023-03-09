@@ -7,7 +7,7 @@ class Sputnik (models.Model):
         return self.url	    
 
 class Data (models.Model):
-    site = models.ForeignKey(Sputnik, on_delete=models.DO_NOTHING)
+    site = models.ForeignKey(Sputnik, on_delete=models.CASCADE)
     time = models.DateTimeField(auto_now_add=True)
     dataLEDesktop = models.JSONField()
     dataOLEDesktop = models.JSONField()
