@@ -146,19 +146,19 @@ def save_data(request):
     form = DataForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
-            portal_id = form.clean_portalid("portal")
+            portal_id = form.cleaned_data["portal"]
             portal_row = Sputnik.objects.get(id=portal_id)
+            print(form.cleaned_data["le_metrics_desktop"])
             data = Data(
-                dataLEDesktop=form.clean_jsonfield("le_metrics_desktop", "loadingExperience"),
-                dataOLEDesktop=form.clean_jsonfield("ole_metrics_desktop", "originLoadingExperience"),
-                dataLEMobile=form.clean_jsonfield("le_metrics_mobile", "loadingExperience"),
-                dataOLEMobile=form.clean_jsonfield("ole_metrics_mobile", "originLoadingExperience"),
+                dataLEDesktop=form.cleaned_data["le_metrics_desktop"],
+                dataOLEDesktop=form.cleaned_data["ole_metrics_desktop"],
+                dataLEMobile=form.cleaned_data["le_metrics_mobile"],
+                dataOLEMobile=form.cleaned_data["ole_metrics_mobile"],
                 site=portal_row
             )
             data.save()
             return render(request, 'getdata/results.html')
         else:
-            print(form.errors)
             return render(request, 'getdata/results.html')
     
 def sputnik_results(request):
