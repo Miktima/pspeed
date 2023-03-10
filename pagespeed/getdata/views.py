@@ -43,11 +43,22 @@ def results(request):
             messages.error(request, ps.error)
             return HttpResponseRedirect(reverse('index'))
         saved_data = Data.objects.filter(site=portal_obj).count()
+        md = ps.lE_metrics_desktop
+        mm = ps.lE_metrics_mobile
+        # Удаляем три не очень важные(?) метрики из настольной и мобильной метрик
+        md.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
+        md.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
+        md.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
+        mm.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
+        mm.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
+        mm.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
         context = {
             "lE_metrics_desktop": ps.lE_metrics_desktop,
             "olE_metrics_desktop": ps.olE_metrics_desktop,
             "lE_metrics_mobile": ps.lE_metrics_mobile,
             "olE_metrics_mobile": ps.olE_metrics_mobile,
+            "metricsDesktop": md,
+            "metricsMobile": mm,
             "portal": portal_obj,
             "saved_data": saved_data
         }
@@ -65,13 +76,6 @@ def saved_results(request, portal_id):
         data_le_desktop_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
         data_le_desktop_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
         data_le_desktop_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
-    data_ole_desktop_FCP = []
-    data_ole_desktop_FID = []
-    data_ole_desktop_LCP = []
-    for d in data.values_list('dataOLEDesktop', flat=True):
-        data_ole_desktop_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
-        data_ole_desktop_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
-        data_ole_desktop_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
     data_le_mobile_FCP = []
     data_le_mobile_FID = []
     data_le_mobile_LCP = []
@@ -79,13 +83,6 @@ def saved_results(request, portal_id):
         data_le_mobile_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
         data_le_mobile_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
         data_le_mobile_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
-    data_ole_mobile_FCP = []
-    data_ole_mobile_FID = []
-    data_ole_mobile_LCP = []
-    for d in data.values_list('dataOLEMobile', flat=True):
-        data_ole_mobile_FCP.append(d["FIRST_CONTENTFUL_PAINT_MS"]["percentile"])
-        data_ole_mobile_FID.append(d["FIRST_INPUT_DELAY_MS"]["percentile"])
-        data_ole_mobile_LCP.append(d["LARGEST_CONTENTFUL_PAINT_MS"]["percentile"])
     # Определение тиков для оси ординат (дат)
     locator = mdates.AutoDateLocator(minticks=5, maxticks=9)
     formatter = mdates.ConciseDateFormatter(locator)
@@ -93,10 +90,8 @@ def saved_results(request, portal_id):
     fig, ax = plt.subplots(figsize=(7, 7), layout='constrained')
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(formatter)
-    ax.plot(timestamps, data_le_desktop_FCP, label="Desktop - конечные пользователи")
-    ax.plot(timestamps, data_ole_desktop_FCP, label="Desktop - источник")
-    ax.plot(timestamps, data_le_mobile_FCP, label="Mobile - конечные пользователи")
-    ax.plot(timestamps, data_ole_mobile_FCP, label="Mobile - источник")
+    ax.plot(timestamps, data_le_desktop_FCP, label="Desktop")
+    ax.plot(timestamps, data_le_mobile_FCP, label="Mobile")
     ax.set_title("FIRST_CONTENTFUL_PAINT_MS")
     ax.set_ylabel("мс") 
     ax.legend()
@@ -108,10 +103,8 @@ def saved_results(request, portal_id):
     fig, ax = plt.subplots(figsize=(7, 7), layout='constrained')
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(formatter)
-    ax.plot(timestamps, data_le_desktop_FID, label="Desktop - конечные пользователи")
-    ax.plot(timestamps, data_ole_desktop_FID, label="Desktop - источник")
-    ax.plot(timestamps, data_le_mobile_FID, label="Mobile - конечные пользователи")
-    ax.plot(timestamps, data_ole_mobile_FID, label="Mobile - источник")
+    ax.plot(timestamps, data_le_desktop_FID, label="Desktop")
+    ax.plot(timestamps, data_le_mobile_FID, label="Mobile")
     ax.set_title("FIRST_INPUT_DELAY_MS")
     ax.set_ylabel("мс") 
     ax.legend()
@@ -123,10 +116,8 @@ def saved_results(request, portal_id):
     fig, ax = plt.subplots(figsize=(7, 7), layout='constrained')
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(formatter)
-    ax.plot(timestamps, data_le_desktop_LCP, label="Desktop - конечные пользователи")
-    ax.plot(timestamps, data_ole_desktop_LCP, label="Desktop - источник")
-    ax.plot(timestamps, data_le_mobile_LCP, label="Mobile - конечные пользователи")
-    ax.plot(timestamps, data_ole_mobile_LCP, label="Mobile - источник")
+    ax.plot(timestamps, data_le_desktop_LCP, label="Desktop")
+    ax.plot(timestamps, data_le_mobile_LCP, label="Mobile")
     ax.set_title("LARGEST_CONTENTFUL_PAINT_MS")
     ax.set_ylabel("мс") 
     ax.legend()
@@ -138,17 +129,18 @@ def saved_results(request, portal_id):
         "FCPimage": FCPimage,
         "FIDimage": FIDimage,
         "LCPimage": LCPimage,
-        "portal": portal
+        "portal": portal,
     }
     return render(request, 'getdata/saved_results.html', context)
 
 def save_data(request):
     form = DataForm(request.POST)
     if request.method == 'POST':
+        print("test")
         if form.is_valid():
             portal_id = form.cleaned_data["portal"]
             portal_row = Sputnik.objects.get(id=portal_id)
-            print(form.cleaned_data["le_metrics_desktop"])
+            # print(form.cleaned_data["le_metrics_desktop"])
             data = Data(
                 dataLEDesktop=form.cleaned_data["le_metrics_desktop"],
                 dataOLEDesktop=form.cleaned_data["ole_metrics_desktop"],
@@ -159,6 +151,7 @@ def save_data(request):
             data.save()
             return render(request, 'getdata/results.html')
         else:
+            # print(form.errors)
             return render(request, 'getdata/results.html')
     
 def sputnik_results(request):
