@@ -45,13 +45,19 @@ def results(request):
         saved_data = Data.objects.filter(site=portal_obj).count()
         md = ps.lE_metrics_desktop
         mm = ps.lE_metrics_mobile
-        # Удаляем три не очень важные(?) метрики из настольной и мобильной метрик
-        md.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
-        md.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
-        md.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
-        mm.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
-        mm.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
-        mm.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
+        # Удаляем три не очень важные(?) метрики из настольной и мобильной метрик (при их наличии)
+        if md.get("CUMULATIVE_LAYOUT_SHIFT_SCORE") != None:
+            md.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
+        if md.get("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT") != None:
+            md.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
+        if md.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
+            md.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
+        if mm.get("CUMULATIVE_LAYOUT_SHIFT_SCORE") != None:
+            mm.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
+        if mm.get("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT") != None:
+            mm.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
+        if mm.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
+            mm.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
         context = {
             "lE_metrics_desktop": ps.lE_metrics_desktop,
             "olE_metrics_desktop": ps.olE_metrics_desktop,
