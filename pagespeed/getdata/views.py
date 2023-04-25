@@ -206,3 +206,5 @@ def sputnik_results(request):
     }
     return render(request, 'getdata/sputnik_results.html', context)
 
+def collect_results(request):
+    pass

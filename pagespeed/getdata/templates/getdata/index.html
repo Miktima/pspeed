@@ -28,7 +28,10 @@
 {% if num_saved_portals > 1 %}
 <div class="row">
     <div class="col m-3">
-            <a class="btn btn-primary" href="{% url 'sputnik_results'%}" role="button">Последние данные по Спутникам</a>
+        <a class="btn btn-primary" href="{% url 'collect_results'%}" role="button">Собрать данные по Спутникам</a>
+    </div>
+    <div class="col m-3">
+        <a class="btn btn-primary" href="{% url 'sputnik_results'%}" role="button">Последние данные по Спутникам</a>
     </div>
 </div>
 {% endif %}
@@ -36,11 +39,12 @@
 {% block back %}
 {% endblock %}
 {% block description %}
-PageSpeed Insights API (PSI) позволяет получать отчеты о скорости загрузки страниц на мобильных устройствах и компьютерах.
+<p>PageSpeed Insights API (PSI) позволяет получать отчеты о скорости загрузки страниц на мобильных устройствах и компьютерах.
 PSI предоставляет как данные о том, насколько быстро страница загружалась у настоящих пользователей.
 После того как вы даете PSI задание проанализировать страницу по определенному URL, выполняется поиск сведений о ней в отчете об удобстве 
 пользования браузером Chrome. В отчет PSI включаются доступные данные по показателям первой отрисовки контента (FCP) и первой задержки ввода (FID) 
 для всего источника или конкретной страницы с указанным URL.
 Данные о фактической скорости загрузки в PSI обновляются ежедневно и охватывают последние 30 дней. 
-<a href="https://developers.google.com/speed/docs/insights/v5/about?hl=ru">Источник</a>
+<a href="https://developers.google.com/speed/docs/insights/v5/about?hl=ru">Источник</a></p>
+<p>Кликнув по соответствующей кнопке, можно собрать данные по всем Спутникам</p>
 {% endblock %}
