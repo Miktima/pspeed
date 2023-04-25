@@ -1,11 +1,11 @@
 import requests
 import time
+import json
 
 
 class PageSpeed:
     def __init__(self, portal):
     # Определяем параметры запросов
-        self.apiKey = ""
         self.serviceUrl = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
         self.portal = portal
         self.lE_metrics_desktop = {}
@@ -13,12 +13,18 @@ class PageSpeed:
         self.lE_metrics_mobile = {}
         self.olE_metrics_mobile = {}
         self.error = ""
+        with open('getdata/config.json') as json_file:
+             all_conf = json.load(json_file)
+             self.config = all_conf['API_KEY']
+             self.apiKey = self.config["key"]
+
         
     def get_result(self):
         # Получаем результат в соответствии с https://developers.google.com/speed/docs/insights/v5/get-started?hl=ru
         # Получаем метрики для desktop
         params = {
             'url': self.portal,
+            'key': self.apiKey,
             'category': 'performance',
             'strategy': 'desktop'
             }
@@ -35,11 +41,12 @@ class PageSpeed:
         except KeyError:
             self.error = "Метрики для настольных браузеров отсутствуют"
             return False
-        # На всякий случай ждем 5 секунд пока нет ключа
-        time.sleep(5)
+        # На всякий случай ждем 1 секунду
+        time.sleep(1)
         # Получаем метрики для mobile
         params = {
             'url': self.portal,
+            'key': self.apiKey,
             'category': 'performance',
             'strategy': 'mobile'
             }
