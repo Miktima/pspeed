@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from .models import Sputnik, Data
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.db.models import Count
 from .PageSpeed import PageSpeed
@@ -142,7 +142,6 @@ def saved_results(request, portal_id):
 def save_data(request):
     form = DataForm(request.POST)
     if request.method == 'POST':
-        print("test")
         if form.is_valid():
             portal_id = form.cleaned_data["portal"]
             portal_row = Sputnik.objects.get(id=portal_id)
@@ -157,7 +156,6 @@ def save_data(request):
             data.save()
             return render(request, 'getdata/results.html')
         else:
-            # print(form.errors)
             return render(request, 'getdata/results.html')
     
 def sputnik_results(request):
@@ -207,4 +205,48 @@ def sputnik_results(request):
     return render(request, 'getdata/sputnik_results.html', context)
 
 def collect_results(request):
-    pass
+    # Выбираем список порталов
+    portal_list = Sputnik.objects.all()
+    # Заполняем списки для выбора даты
+    context = {
+        'portal_list': portal_list,
+        "num_portals": len(portal_list)
+    }
+    return render(request, "getdata/collect_results.html", context=context)    
+
+def auto_results(request):
+    portal_id = request.POST['portal']
+    portal_obj = Sputnik.objects.get(id=portal_id)
+    # Вызываем утилиту PageSpeed
+    ps = PageSpeed(portal_obj.url)
+    res = ps.get_result()
+    if res == False:
+        response = {'status': "false"}
+        return JsonResponse(response)
+    saved_data = Data.objects.filter(site=portal_obj).count()
+    md = ps.lE_metrics_desktop
+    mm = ps.lE_metrics_mobile
+    # Удаляем три не очень важные(?) метрики из настольной и мобильной метрик (при их наличии)
+    if md.get("CUMULATIVE_LAYOUT_SHIFT_SCORE") != None:
+        md.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
+    if md.get("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT") != None:
+        md.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
+    if md.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
+        md.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
+    if mm.get("CUMULATIVE_LAYOUT_SHIFT_SCORE") != None:
+        mm.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
+    if mm.get("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT") != None:
+        mm.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
+    if mm.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
+        mm.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
+    response = {
+        "lE_metrics_desktop": ps.lE_metrics_desktop,
+        "olE_metrics_desktop": ps.olE_metrics_desktop,
+        "lE_metrics_mobile": ps.lE_metrics_mobile,
+        "olE_metrics_mobile": ps.olE_metrics_mobile,
+        "metricsDesktop": md,
+        "metricsMobile": mm,
+        "portal": portal_obj,
+        "status": "true"
+    }
+    return render(request, 'getdata/results.html', response)

@@ -1,0 +1,92 @@
+{% extends "getdata/base_results.html" %}
+{% block content %}
+    <div class="container text-center">
+        <div class="row">
+            <table class="table">
+                <thead>
+                    <tr>
+                      <th scope="col">Sputnik portal</th>
+                      <th scope="col">Status</th>
+                    </tr>
+                </thead>                
+                {% for portal in portal_list %}
+                <tbody>
+                    <tr>
+                      <td>{{portal.url}}</td>
+                      <td><img src="../../static/getdata/img/question.svg" height="16" width="16" id="img_status_{{portal.id}}"></td>
+                    </tr>
+                </tbody>
+                {% endfor %}
+            </table>
+            <div class="col m-3">
+                <form method="post" id="save_form">
+                    {% csrf_token %}
+                    <input type="hidden" name="le_metrics_desktop" id="le_desktop" value="{{lE_metrics_desktop}}">
+                    <input type="hidden" name="ole_metrics_desktop" id="ole_desktop" value="{{olE_metrics_desktop}}">
+                    <input type="hidden" name="le_metrics_mobile" id="le_mobile" value="{{lE_metrics_mobile}}">
+                    <input type="hidden" name="ole_metrics_mobile" id="ole_mobile" value="{{olE_metrics_mobile}}">
+                    <input type="hidden" name="portal" id="idportal" value="{{portal.id}}">
+                    <button class="btn btn-primary" type="submit" id="save_btn">Сохранить данные</button>
+                </form>
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $.ajax({
+                            type:'POST',
+                            url:'{% url "auto_results" %}',
+                            data:
+                            {
+                                portal: "1",
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                            },
+                            success:function(){
+                                        $("#save_btn").text("Данные сохранены");
+                                        $("#save_btn").prop('disabled', true);
+                                    },
+                            error: function(xhr, errmsg, err) {
+                                        alert("Status: " + xhr.status + "ERROR:" + xhr.error + " " + errmsg + " " + err); 
+                                   },                            
+                            });
+                    });
+                    function request(i) {
+                        $.get("demo_test.asp", function(data, status){
+                            alert("Data: " + data + "\nStatus: " + status);
+                        });
+                        $("#img_status_" + i).prop('src', '../../static/getdata/img/check.svg');
+                    }                    
+                    $("#save_form").on('submit', function(e){
+                        e.preventDefault();
+                        $.ajax({
+                            type:'POST',
+                            url:'{% url "save_data" %}',
+                            data:
+                            {
+                                le_metrics_desktop: JSON.stringify($("#le_desktop").val()),
+                                ole_metrics_desktop: JSON.stringify($("#ole_desktop").val()),
+                                le_metrics_mobile: JSON.stringify($("#le_mobile").val()),
+                                ole_metrics_mobile: JSON.stringify($("#ole_mobile").val()),
+                                portal: $("#idportal").val(),
+                                csrfmiddlewaretoken: '{{ csrf_token }}',
+                            },
+                            success:function(){
+                                        $("#save_btn").text("Данные сохранены");
+                                        $("#save_btn").prop('disabled', true);
+                                    },
+                            error: function(xhr, errmsg, err) {
+                                        alert("Status: " + xhr.status + "ERROR:" + xhr.error + " " + errmsg + " " + err); 
+                                   },                            
+                            });
+                        });
+                </script>                
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block description %}
+<ul>
+    <li>FIRST_CONTENTFUL_PAINT_MS - первая отрисовка контента. Измеряет, сколько времени требуется для визуализации исходного содержимого DOM, 
+        но не фиксирует, сколько времени потребовалось для визуализации самого большого (обычно более значимого) содержимого на странице</li>
+    <li>FIRST_INPUT_DELAY_MS - Время ожидания для первого взаимодействия с контентом.</li>
+    <li>LARGEST_CONTENTFUL_PAINT_MS - скорость загрузки основного контента. Измеряет время, за которое становится видимым самый большой элемент контента в области просмотра.</li>
+</ul>
+{% endblock %}
+{% block back_url %}{% url 'index' %}{% endblock %}
