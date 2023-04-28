@@ -39,20 +39,16 @@
                                 csrfmiddlewaretoken: '{{ csrf_token }}',
                             },
                             success:function(){
-                                        $("#save_btn").text("Данные сохранены");
-                                        $("#save_btn").prop('disabled', true);
+                                        var le_desktop = $('<input type="hidden" name="le_metrics_desktop_portal1" id="le_desktop_portal1">');
+                                        le_desktop.val("{{lE_metrics_desktop}}");
+                                        $("#save_form").append(le_desktop);
+                                        $("#img_status_1").prop('src', '../../static/getdata/img/check.svg');
                                     },
                             error: function(xhr, errmsg, err) {
                                         alert("Status: " + xhr.status + "ERROR:" + xhr.error + " " + errmsg + " " + err); 
                                    },                            
                             });
                     });
-                    function request(i) {
-                        $.get("demo_test.asp", function(data, status){
-                            alert("Data: " + data + "\nStatus: " + status);
-                        });
-                        $("#img_status_" + i).prop('src', '../../static/getdata/img/check.svg');
-                    }                    
                     $("#save_form").on('submit', function(e){
                         e.preventDefault();
                         $.ajax({

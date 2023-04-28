@@ -220,33 +220,27 @@ def auto_results(request):
     # Вызываем утилиту PageSpeed
     ps = PageSpeed(portal_obj.url)
     res = ps.get_result()
+    # Если результат отрицательный, то возвращаем соответствующий статус
     if res == False:
         response = {'status': "false"}
         return JsonResponse(response)
-    saved_data = Data.objects.filter(site=portal_obj).count()
+    # Если хотя бы одна из важных (?) метрик не получена, то считаем результат отрицательным
     md = ps.lE_metrics_desktop
     mm = ps.lE_metrics_mobile
-    # Удаляем три не очень важные(?) метрики из настольной и мобильной метрик (при их наличии)
-    if md.get("CUMULATIVE_LAYOUT_SHIFT_SCORE") != None:
-        md.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
-    if md.get("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT") != None:
-        md.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
-    if md.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
-        md.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
-    if mm.get("CUMULATIVE_LAYOUT_SHIFT_SCORE") != None:
-        mm.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
-    if mm.get("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT") != None:
-        mm.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
-    if mm.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
-        mm.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
+    if md.get("FIRST_CONTENTFUL_PAINT_MS") == None or\
+        md.get("FIRST_INPUT_DELAY_MS") == None or\
+        md.get("LARGEST_CONTENTFUL_PAINT_MS") == None or\
+        mm.get("FIRST_CONTENTFUL_PAINT_MS") == None or\
+        mm.get("FIRST_INPUT_DELAY_MS") == None or\
+        mm.get("LARGEST_CONTENTFUL_PAINT_MS") == None:
+        response = {'status': "false"}
+        return JsonResponse(response)
     response = {
         "lE_metrics_desktop": ps.lE_metrics_desktop,
         "olE_metrics_desktop": ps.olE_metrics_desktop,
         "lE_metrics_mobile": ps.lE_metrics_mobile,
         "olE_metrics_mobile": ps.olE_metrics_mobile,
-        "metricsDesktop": md,
-        "metricsMobile": mm,
         "portal": portal_obj,
         "status": "true"
     }
-    return render(request, 'getdata/results.html', response)
+    return render(request, 'getdata/collect_results.html', response)
