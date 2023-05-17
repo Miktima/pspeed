@@ -21,11 +21,10 @@
             <div class="col m-3">
                 <form method="post" id="save_form">
                     {% csrf_token %}
-                    <input type="hidden" name="le_metrics_desktop" id="le_desktop" value="{{lE_metrics_desktop}}">
-                    <input type="hidden" name="ole_metrics_desktop" id="ole_desktop" value="{{olE_metrics_desktop}}">
-                    <input type="hidden" name="le_metrics_mobile" id="le_mobile" value="{{lE_metrics_mobile}}">
-                    <input type="hidden" name="ole_metrics_mobile" id="ole_mobile" value="{{olE_metrics_mobile}}">
-                    <input type="hidden" name="portal" id="idportal" value="{{portal.id}}">
+                    {% for portal in portal_list %}
+                        <input type="hidden" name="metrics_desktop_{{portal.id}}" id="mdesktop_{{portal.id}}" value="">
+                        <input type="hidden" name="metrics_mobile_{{portal.id}}" id="mmobile_{{portal.id}}" value="">
+                    {% endfor %}
                     <button class="btn btn-primary" type="submit" id="save_btn">Сохранить данные</button>
                 </form>
                 <script type="text/javascript">
@@ -39,8 +38,10 @@
                                 csrfmiddlewaretoken: '{{ csrf_token }}',
                             },
                             success:function(){
-                                        $("#save_btn").text("Данные сохранены");
-                                        $("#save_btn").prop('disabled', true);
+                                        $("#mdesktop_1").val("{{md}}");
+                                        $("#mmobile_1").val("{{mm}}");
+                                        if ("{{status}}" == "true"
+                                        $("#img_status_1").prop('src', '../../static/getdata/img/check.svg');
                                     },
                             error: function(xhr, errmsg, err) {
                                         alert("Status: " + xhr.status + "ERROR:" + xhr.error + " " + errmsg + " " + err); 

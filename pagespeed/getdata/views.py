@@ -223,7 +223,6 @@ def auto_results(request):
     if res == False:
         response = {'status': "false"}
         return JsonResponse(response)
-    saved_data = Data.objects.filter(site=portal_obj).count()
     md = ps.lE_metrics_desktop
     mm = ps.lE_metrics_mobile
     # Удаляем три не очень важные(?) метрики из настольной и мобильной метрик (при их наличии)
@@ -239,14 +238,19 @@ def auto_results(request):
         mm.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
     if mm.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
         mm.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
+    # Проверяем, что все "важные" данные есть
+    if md.get("FIRST_CONTENTFUL_PAINT_MS") == None or\
+        md.get("FIRST_INPUT_DELAY_MS") == None or\
+        md.get("LARGEST_CONTENTFUL_PAINT_MS") == None or\
+        mm.get("FIRST_CONTENTFUL_PAINT_MS") == None or\
+        mm.get("FIRST_INPUT_DELAY_MS") == None or\
+        mm.get("LARGEST_CONTENTFUL_PAINT_MS") == None:
+            response = {'status': "false"}
+    else:
+            response = {'status': "true"}
     response = {
-        "lE_metrics_desktop": ps.lE_metrics_desktop,
-        "olE_metrics_desktop": ps.olE_metrics_desktop,
-        "lE_metrics_mobile": ps.lE_metrics_mobile,
-        "olE_metrics_mobile": ps.olE_metrics_mobile,
         "metricsDesktop": md,
         "metricsMobile": mm,
         "portal": portal_obj,
-        "status": "true"
     }
-    return render(request, 'getdata/results.html', response)
+    return render(request, 'getdata/collect_results.html', response)
