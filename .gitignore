@@ -2,3 +2,4 @@
 pagespeed/getdata/__pycache__/
 pagespeed/pagespeed/__pycache__/
 pagespeed/getdata/config.json
+*.pyc

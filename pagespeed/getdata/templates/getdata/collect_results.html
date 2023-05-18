@@ -28,26 +28,42 @@
                     <button class="btn btn-primary" type="submit" id="save_btn">Сохранить данные</button>
                 </form>
                 <script type="text/javascript">
-                    $(document).ready(function() {
+                    var nlimit = 3;
+                    var iter = 1;
+                    function ajaxFunc(iter, nlimit) {
                         $.ajax({
                             type:'POST',
                             url:'{% url "auto_results" %}',
                             data:
                             {
-                                portal: "1",
+                                portal: iter,
                                 csrfmiddlewaretoken: '{{ csrf_token }}',
                             },
-                            success:function(){
-                                        $("#mdesktop_1").val("{{md}}");
-                                        $("#mmobile_1").val("{{mm}}");
-                                        if ("{{status}}" == "true"
-                                        $("#img_status_1").prop('src', '../../static/getdata/img/check.svg');
+                            success:function(response){
+                                        md = (response.metricsDesktop).replaceAll("\"", "'")
+                                        mm = (response.metricsMobile).replaceAll("\"", "'")
+                                        $("#mdesktop_" + iter).val(md);
+                                        $("#mmobile_" + iter).val(mm);
+                                        if (response.status == "true") {
+                                            $("#img_status_" + iter).prop('src', '../../static/getdata/img/check.svg');
+                                        }
+                                        else {
+                                            $("#img_status_" + iter).prop('src', '../../static/getdata/img/dash-circle.svg');
+                                        }
                                     },
                             error: function(xhr, errmsg, err) {
-                                        alert("Status: " + xhr.status + "ERROR:" + xhr.error + " " + errmsg + " " + err); 
-                                   },                            
+                                        alert("Status " + "(" + iter + ") :" + xhr.status + "  ERROR:" + xhr.error + " " + errmsg + " " + err); 
+                                    },
+                            complete: function(iter, nlimit) {
+                                        if (iter < nlimit)
+                                        {
+                                            iter++;
+                                            ajaxFunc(iter, nlimit);
+                                        }
+                                    },                            
                             });
-                    });
+                    }
+                    $(document).ready(ajaxFunc(iter, nlimit))
                     $("#save_form").on('submit', function(e){
                         e.preventDefault();
                         $.ajax({
@@ -77,11 +93,9 @@
     </div>
 {% endblock %}
 {% block description %}
-<ul>
-    <li>FIRST_CONTENTFUL_PAINT_MS - первая отрисовка контента. Измеряет, сколько времени требуется для визуализации исходного содержимого DOM, 
-        но не фиксирует, сколько времени потребовалось для визуализации самого большого (обычно более значимого) содержимого на странице</li>
-    <li>FIRST_INPUT_DELAY_MS - Время ожидания для первого взаимодействия с контентом.</li>
-    <li>LARGEST_CONTENTFUL_PAINT_MS - скорость загрузки основного контента. Измеряет время, за которое становится видимым самый большой элемент контента в области просмотра.</li>
-</ul>
+После загрузки страницы инициализируется поиск сведений о порталах проекта Sputnik в отчете об удобстве пользования браузером Chrome. 
+В отчет PSI включаются доступные данные по показателям первой отрисовки контента (FCP) и первой задержки ввода (FID) для порталов проекта Sputnik.
+На странице происходит индикация сбора сведений. После сбора всех сведений их можно сохранить в базе данных.  
+
 {% endblock %}
 {% block back_url %}{% url 'index' %}{% endblock %}

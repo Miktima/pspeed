@@ -20,7 +20,7 @@ def index(request):
     # Выбираем список порталов
     portal_list = Sputnik.objects.all()
     p = len(Data.objects.all().annotate(Count('site_id', distinct=True)))
-    # Заполняем списки для выбора даты
+    # Заполняем списки для выбора порталов
     context = {
         'portal_list': portal_list,
         'num_saved_portals': p,
@@ -50,12 +50,16 @@ def results(request):
             md.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
         if md.get("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT") != None:
             md.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
+        if md.get("INTERACTION_TO_NEXT_PAINT") != None:
+            md.pop("INTERACTION_TO_NEXT_PAINT")
         if md.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
             md.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
         if mm.get("CUMULATIVE_LAYOUT_SHIFT_SCORE") != None:
             mm.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
         if mm.get("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT") != None:
             mm.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
+        if mm.get("INTERACTION_TO_NEXT_PAINT") != None:
+            mm.pop("INTERACTION_TO_NEXT_PAINT")
         if mm.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
             mm.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
         context = {
@@ -209,8 +213,7 @@ def collect_results(request):
     portal_list = Sputnik.objects.all()
     # Заполняем списки для выбора даты
     context = {
-        'portal_list': portal_list,
-        "num_portals": len(portal_list)
+        'portal_list': portal_list
     }
     return render(request, "getdata/collect_results.html", context=context)    
 
@@ -224,7 +227,6 @@ def auto_results(request):
     if res == False:
         response = {'status': "false"}
         return JsonResponse(response)
-<<<<<<< HEAD
     md = ps.lE_metrics_desktop
     mm = ps.lE_metrics_mobile
     # Удаляем три не очень важные(?) метрики из настольной и мобильной метрик (при их наличии)
@@ -241,33 +243,23 @@ def auto_results(request):
     if mm.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
         mm.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
     # Проверяем, что все "важные" данные есть
-=======
-    # Если хотя бы одна из важных (?) метрик не получена, то считаем результат отрицательным
-    md = ps.lE_metrics_desktop
-    mm = ps.lE_metrics_mobile
->>>>>>> 8bc75f2057b1243061cd5a737a9b619fd375bb05
     if md.get("FIRST_CONTENTFUL_PAINT_MS") == None or\
         md.get("FIRST_INPUT_DELAY_MS") == None or\
         md.get("LARGEST_CONTENTFUL_PAINT_MS") == None or\
         mm.get("FIRST_CONTENTFUL_PAINT_MS") == None or\
         mm.get("FIRST_INPUT_DELAY_MS") == None or\
         mm.get("LARGEST_CONTENTFUL_PAINT_MS") == None:
-<<<<<<< HEAD
-            response = {'status': "false"}
+            response = {
+                "metricsDesktop": json.dumps(md),
+                "metricsMobile": json.dumps(mm),
+                "portal": portal_id,
+                "status": "false"
+            }
     else:
-            response = {'status': "true"}
-    response = {
-        "metricsDesktop": md,
-        "metricsMobile": mm,
-=======
-        response = {'status': "false"}
-        return JsonResponse(response)
-    response = {
-        "lE_metrics_desktop": ps.lE_metrics_desktop,
-        "olE_metrics_desktop": ps.olE_metrics_desktop,
-        "lE_metrics_mobile": ps.lE_metrics_mobile,
-        "olE_metrics_mobile": ps.olE_metrics_mobile,
->>>>>>> 8bc75f2057b1243061cd5a737a9b619fd375bb05
-        "portal": portal_obj,
-    }
-    return render(request, 'getdata/collect_results.html', response)
+            response = {
+                "metricsDesktop": json.dumps(md),
+                "metricsMobile": json.dumps(mm),
+                "portal": portal_id,
+                "status": "true"
+            }
+    return JsonResponse(response)
