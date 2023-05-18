@@ -48,12 +48,6 @@
                                    },                            
                             });
                     });
-                    function request(i) {
-                        $.get("demo_test.asp", function(data, status){
-                            alert("Data: " + data + "\nStatus: " + status);
-                        });
-                        $("#img_status_" + i).prop('src', '../../static/getdata/img/check.svg');
-                    }                    
                     $("#save_form").on('submit', function(e){
                         e.preventDefault();
                         $.ajax({

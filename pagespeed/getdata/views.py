@@ -220,9 +220,11 @@ def auto_results(request):
     # Вызываем утилиту PageSpeed
     ps = PageSpeed(portal_obj.url)
     res = ps.get_result()
+    # Если результат отрицательный, то возвращаем соответствующий статус
     if res == False:
         response = {'status': "false"}
         return JsonResponse(response)
+<<<<<<< HEAD
     md = ps.lE_metrics_desktop
     mm = ps.lE_metrics_mobile
     # Удаляем три не очень важные(?) метрики из настольной и мобильной метрик (при их наличии)
@@ -239,18 +241,33 @@ def auto_results(request):
     if mm.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
         mm.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
     # Проверяем, что все "важные" данные есть
+=======
+    # Если хотя бы одна из важных (?) метрик не получена, то считаем результат отрицательным
+    md = ps.lE_metrics_desktop
+    mm = ps.lE_metrics_mobile
+>>>>>>> 8bc75f2057b1243061cd5a737a9b619fd375bb05
     if md.get("FIRST_CONTENTFUL_PAINT_MS") == None or\
         md.get("FIRST_INPUT_DELAY_MS") == None or\
         md.get("LARGEST_CONTENTFUL_PAINT_MS") == None or\
         mm.get("FIRST_CONTENTFUL_PAINT_MS") == None or\
         mm.get("FIRST_INPUT_DELAY_MS") == None or\
         mm.get("LARGEST_CONTENTFUL_PAINT_MS") == None:
+<<<<<<< HEAD
             response = {'status': "false"}
     else:
             response = {'status': "true"}
     response = {
         "metricsDesktop": md,
         "metricsMobile": mm,
+=======
+        response = {'status': "false"}
+        return JsonResponse(response)
+    response = {
+        "lE_metrics_desktop": ps.lE_metrics_desktop,
+        "olE_metrics_desktop": ps.olE_metrics_desktop,
+        "lE_metrics_mobile": ps.lE_metrics_mobile,
+        "olE_metrics_mobile": ps.olE_metrics_mobile,
+>>>>>>> 8bc75f2057b1243061cd5a737a9b619fd375bb05
         "portal": portal_obj,
     }
     return render(request, 'getdata/collect_results.html', response)
