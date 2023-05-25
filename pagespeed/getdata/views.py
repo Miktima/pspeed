@@ -219,6 +219,8 @@ def collect_results(request):
 
 def auto_results(request):
     portal_id = request.POST['portal']
+    if int(portal_id) == 1:
+        portal_id = 28
     if int(portal_id) == -1:
         portal_obj = Sputnik.objects.order_by('pk').first()
         next_id = portal_obj.pk
@@ -227,8 +229,15 @@ def auto_results(request):
             'next': next_id
             }
         return JsonResponse(response)
+    elif int(portal_id) > 0:
+        portal_obj = Sputnik.objects.get(pk=portal_id)
+        is_elements = Sputnik.objects.order_by('pk').filter(pk__gt = portal_id).count()
+        if is_elements == 0:
+            next_id = -2
+        else:
+            portal_obj_next = Sputnik.objects.order_by('pk').filter(pk__gt = portal_id).first()
+            next_id = portal_obj_next.pk
     # Вызываем утилиту PageSpeed
-    print ("!!!")
     ps = PageSpeed(portal_obj.url)
     res = ps.get_result()
     # Если результат отрицательный, то возвращаем соответствующий статус

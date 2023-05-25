@@ -49,18 +49,13 @@
                                     if (response.status == "false") {
                                         $("#img_status_" + iter).prop('src', '../../static/getdata/img/dash-circle.svg');
                                     }
-                                    ajaxFunc(response.next);
+                                    if (response.next > 0) {
+                                        ajaxFunc(response.next);
+                                    }
                                 },
                             error: function(xhr, errmsg, err) {
                                         alert("Status " + "(" + iter + "): " + xhr.status + "  ERROR:" + xhr.error + " " + errmsg + " " + err); 
                                     },
-                            complete: function(response) {
-                                        if (response.next > 0)
-                                        {
-                                            alert ('!!!');
-                                            ajaxFunc(response.next);
-                                        }
-                                    },                            
                             });
                     }
                     $(document).ready(ajaxFunc(iter))
