@@ -28,9 +28,8 @@
                     <button class="btn btn-primary" type="submit" id="save_btn">Сохранить данные</button>
                 </form>
                 <script type="text/javascript">
-                    var nlimit = 3;
-                    var iter = 1;
-                    function ajaxFunc(iter, nlimit) {
+                    var iter = -1;
+                    function ajaxFunc(iter) {
                         $.ajax({
                             type:'POST',
                             url:'{% url "auto_results" %}',
@@ -40,30 +39,31 @@
                                 csrfmiddlewaretoken: '{{ csrf_token }}',
                             },
                             success:function(response){
-                                        md = (response.metricsDesktop).replaceAll("\"", "'")
-                                        mm = (response.metricsMobile).replaceAll("\"", "'")
+                                    if (response.status == 'true' ) {
+                                        md = (response.metricsDesktop).replaceAll("\"", "'");
+                                        mm = (response.metricsMobile).replaceAll("\"", "'");
                                         $("#mdesktop_" + iter).val(md);
                                         $("#mmobile_" + iter).val(mm);
-                                        if (response.status == "true") {
-                                            $("#img_status_" + iter).prop('src', '../../static/getdata/img/check.svg');
-                                        }
-                                        else {
-                                            $("#img_status_" + iter).prop('src', '../../static/getdata/img/dash-circle.svg');
-                                        }
-                                    },
+                                        $("#img_status_" + iter).prop('src', '../../static/getdata/img/check.svg');
+                                    }
+                                    if (response.status == "false") {
+                                        $("#img_status_" + iter).prop('src', '../../static/getdata/img/dash-circle.svg');
+                                    }
+                                    ajaxFunc(response.next);
+                                },
                             error: function(xhr, errmsg, err) {
-                                        alert("Status " + "(" + iter + ") :" + xhr.status + "  ERROR:" + xhr.error + " " + errmsg + " " + err); 
+                                        alert("Status " + "(" + iter + "): " + xhr.status + "  ERROR:" + xhr.error + " " + errmsg + " " + err); 
                                     },
-                            complete: function(iter, nlimit) {
-                                        if (iter < nlimit)
+                            complete: function(response) {
+                                        if (response.next > 0)
                                         {
-                                            iter++;
-                                            ajaxFunc(iter, nlimit);
+                                            alert ('!!!');
+                                            ajaxFunc(response.next);
                                         }
                                     },                            
                             });
                     }
-                    $(document).ready(ajaxFunc(iter, nlimit))
+                    $(document).ready(ajaxFunc(iter))
                     $("#save_form").on('submit', function(e){
                         e.preventDefault();
                         $.ajax({

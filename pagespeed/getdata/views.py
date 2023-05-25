@@ -219,13 +219,24 @@ def collect_results(request):
 
 def auto_results(request):
     portal_id = request.POST['portal']
-    portal_obj = Sputnik.objects.get(id=portal_id)
+    if int(portal_id) == -1:
+        portal_obj = Sputnik.objects.order_by('pk').first()
+        next_id = portal_obj.pk
+        response = {
+            'status': "initial",
+            'next': next_id
+            }
+        return JsonResponse(response)
     # Вызываем утилиту PageSpeed
+    print ("!!!")
     ps = PageSpeed(portal_obj.url)
     res = ps.get_result()
     # Если результат отрицательный, то возвращаем соответствующий статус
     if res == False:
-        response = {'status': "false"}
+        response = {
+            'status': "false",
+            'next': next_id
+            }
         return JsonResponse(response)
     md = ps.lE_metrics_desktop
     mm = ps.lE_metrics_mobile
@@ -253,13 +264,15 @@ def auto_results(request):
                 "metricsDesktop": json.dumps(md),
                 "metricsMobile": json.dumps(mm),
                 "portal": portal_id,
-                "status": "false"
+                "status": "false",
+                'next': next_id
             }
     else:
             response = {
                 "metricsDesktop": json.dumps(md),
                 "metricsMobile": json.dumps(mm),
                 "portal": portal_id,
-                "status": "true"
+                "status": "true",
+                'next': next_id
             }
     return JsonResponse(response)
