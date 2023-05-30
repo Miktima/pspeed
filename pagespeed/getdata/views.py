@@ -249,19 +249,6 @@ def auto_results(request):
         return JsonResponse(response)
     md = ps.lE_metrics_desktop
     mm = ps.lE_metrics_mobile
-    # Удаляем три не очень важные(?) метрики из настольной и мобильной метрик (при их наличии)
-    if md.get("CUMULATIVE_LAYOUT_SHIFT_SCORE") != None:
-        md.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
-    if md.get("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT") != None:
-        md.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
-    if md.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
-        md.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
-    if mm.get("CUMULATIVE_LAYOUT_SHIFT_SCORE") != None:
-        mm.pop("CUMULATIVE_LAYOUT_SHIFT_SCORE")
-    if mm.get("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT") != None:
-        mm.pop("EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT")
-    if mm.get("EXPERIMENTAL_TIME_TO_FIRST_BYTE") != None:
-        mm.pop("EXPERIMENTAL_TIME_TO_FIRST_BYTE")
     # Проверяем, что все "важные" данные есть
     if md.get("FIRST_CONTENTFUL_PAINT_MS") == None or\
         md.get("FIRST_INPUT_DELAY_MS") == None or\
@@ -270,18 +257,37 @@ def auto_results(request):
         mm.get("FIRST_INPUT_DELAY_MS") == None or\
         mm.get("LARGEST_CONTENTFUL_PAINT_MS") == None:
             response = {
-                "metricsDesktop": json.dumps(md),
-                "metricsMobile": json.dumps(mm),
+                "lE_metrics_desktop": json.dumps(ps.lE_metrics_desktop),
+                "olE_metrics_desktop": json.dumps(ps.olE_metrics_desktop),
+                "lE_metrics_mobile": json.dumps(ps.lE_metrics_mobile),
+                "olE_metrics_mobile": json.dumps(ps.olE_metrics_mobile),
                 "portal": portal_id,
                 "status": "false",
                 'next': next_id
             }
     else:
             response = {
-                "metricsDesktop": json.dumps(md),
-                "metricsMobile": json.dumps(mm),
+                "le_metrics_desktop": json.dumps(ps.lE_metrics_desktop),
+                "ole_metrics_desktop": json.dumps(ps.olE_metrics_desktop),
+                "le_metrics_mobile": json.dumps(ps.lE_metrics_mobile),
+                "ole_metrics_mobile": json.dumps(ps.olE_metrics_mobile),
                 "portal": portal_id,
                 "status": "true",
                 'next': next_id
             }
     return JsonResponse(response)
+
+def save_collected_data(request):
+    form = "1"
+    portal_id = form.cleaned_data["portal"]
+    portal_row = Sputnik.objects.get(id=portal_id)
+    # print(form.cleaned_data["le_metrics_desktop"])
+    data = Data(
+        dataLEDesktop=form.cleaned_data["le_metrics_desktop"],
+        dataOLEDesktop=form.cleaned_data["ole_metrics_desktop"],
+        dataLEMobile=form.cleaned_data["le_metrics_mobile"],
+        dataOLEMobile=form.cleaned_data["ole_metrics_mobile"],
+        site=portal_row
+    )
+    data.save()
+    return render(request, 'getdata/results.html')

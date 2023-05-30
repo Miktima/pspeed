@@ -21,9 +21,13 @@
             <div class="col m-3">
                 <form method="post" id="save_form">
                     {% csrf_token %}
+                    <input type="hidden" name="save_portals" id="save_portals" value="">
                     {% for portal in portal_list %}
-                        <input type="hidden" name="metrics_desktop_{{portal.id}}" id="mdesktop_{{portal.id}}" value="">
-                        <input type="hidden" name="metrics_mobile_{{portal.id}}" id="mmobile_{{portal.id}}" value="">
+                        <input type="hidden" name="metrics_status_{{portal.id}}" id="mstatus_{{portal.id}}" value="">
+                        <input type="hidden" name="le_metrics_desktop_{{portal.id}}" id="lemdesktop_{{portal.id}}" value="">
+                        <input type="hidden" name="ole_metrics_desktop_{{portal.id}}" id="olemdesktop_{{portal.id}}" value="">
+                        <input type="hidden" name="le_metrics_mobile_{{portal.id}}" id="lemmobile_{{portal.id}}" value="">
+                        <input type="hidden" name="ole_metrics_mobile_{{portal.id}}" id="olemmobile_{{portal.id}}" value="">
                     {% endfor %}
                     <button class="btn btn-primary" type="submit" id="save_btn">Сохранить данные</button>
                 </form>
@@ -40,14 +44,23 @@
                             },
                             success:function(response){
                                     if (response.status == 'true' ) {
-                                        md = (response.metricsDesktop).replaceAll("\"", "'");
-                                        mm = (response.metricsMobile).replaceAll("\"", "'");
-                                        $("#mdesktop_" + iter).val(md);
-                                        $("#mmobile_" + iter).val(mm);
+                                        lemdesktop = (response.le_metrics_desktop).replaceAll("\"", "'");
+                                        olemdesktop = (response.ole_metrics_desktop).replaceAll("\"", "'");
+                                        lemmobile = (response.le_metrics_mobile).replaceAll("\"", "'");
+                                        olemmobile = (response.le_metrics_mobile).replaceAll("\"", "'");
+                                        var portals_list = $("#save_portals").val();
+                                        portals_list += iter + ' ';
+                                        $("#save_portals").val(portals_list); 
+                                        $("#lemdesktop_" + iter).val(lemdesktop);
+                                        $("#olemdesktop_" + iter).val(olemdesktop);
+                                        $("#lemmobile_" + iter).val(lemmobile);
+                                        $("#olemmobile_" + iter).val(olemmobile);
+                                        $("#mstatus_" + iter).val(response.status);
                                         $("#img_status_" + iter).prop('src', '../../static/getdata/img/check.svg');
                                     }
                                     if (response.status == "false") {
                                         $("#img_status_" + iter).prop('src', '../../static/getdata/img/dash-circle.svg');
+                                        $("#mstatus_" + iter).val(response.status);
                                     }
                                     if (response.next > 0) {
                                         ajaxFunc(response.next);
@@ -61,9 +74,18 @@
                     $(document).ready(ajaxFunc(iter))
                     $("#save_form").on('submit', function(e){
                         e.preventDefault();
-                        $.ajax({
+                        var portals = ($("#save_portals").val()).trim();
+                        portals = portals.split(" ");
+                        let post_data = {}
+                        for (const p of portals) {
+                            post_data['le_metrics_desktop' + p] = JSON.stringify($("#lemdesktop_" + p).val());
+                        }
+                        for (const property in post_data) {
+                            alert(`${property}: ${post_data[property]}`);
+                        }
+/*                        $.ajax({
                             type:'POST',
-                            url:'{% url "save_data" %}',
+                            url:'{% url "save_collected_data" %}',
                             data:
                             {
                                 le_metrics_desktop: JSON.stringify($("#le_desktop").val()),
@@ -80,7 +102,7 @@
                             error: function(xhr, errmsg, err) {
                                         alert("Status: " + xhr.status + "ERROR:" + xhr.error + " " + errmsg + " " + err); 
                                    },                            
-                            });
+                            });*/
                         });
                 </script>                
             </div>

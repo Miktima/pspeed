@@ -10,4 +10,5 @@ urlpatterns = [
     path('sputnik_results/', views.sputnik_results, name='sputnik_results'),
     path('collect_results/', views.collect_results, name='collect_results'),
     path('auto_results.html', views.auto_results, name='auto_results'),
+    path('save_collected_data.html', views.save_collected_data, name='save_collected_data')
 ]
