@@ -79,22 +79,16 @@
                         let post_data = {}
                         for (const p of portals) {
                             post_data['le_metrics_desktop' + p] = JSON.stringify($("#lemdesktop_" + p).val());
+                            post_data['ole_metrics_desktop' + p] = JSON.stringify($("#olemdesktop_" + p).val());
+                            post_data['le_metrics_mobile' + p] = JSON.stringify($("#lemmobile_" + p).val());
+                            post_data['ole_metrics_mobile' + p] = JSON.stringify($("#olemmobile_" + p).val());
                         }
-                        for (const property in post_data) {
-                            alert(`${property}: ${post_data[property]}`);
-                        }
-/*                        $.ajax({
+                        post_data['csrfmiddlewaretoken'] = '{{ csrf_token }}';
+
+                        $.ajax({
                             type:'POST',
                             url:'{% url "save_collected_data" %}',
-                            data:
-                            {
-                                le_metrics_desktop: JSON.stringify($("#le_desktop").val()),
-                                ole_metrics_desktop: JSON.stringify($("#ole_desktop").val()),
-                                le_metrics_mobile: JSON.stringify($("#le_mobile").val()),
-                                ole_metrics_mobile: JSON.stringify($("#ole_mobile").val()),
-                                portal: $("#idportal").val(),
-                                csrfmiddlewaretoken: '{{ csrf_token }}',
-                            },
+                            data: post_data,
                             success:function(){
                                         $("#save_btn").text("Данные сохранены");
                                         $("#save_btn").prop('disabled', true);
@@ -102,7 +96,7 @@
                             error: function(xhr, errmsg, err) {
                                         alert("Status: " + xhr.status + "ERROR:" + xhr.error + " " + errmsg + " " + err); 
                                    },                            
-                            });*/
+                            });
                         });
                 </script>                
             </div>
