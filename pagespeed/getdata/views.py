@@ -7,6 +7,7 @@ from django.db.models import Count
 from .PageSpeed import PageSpeed
 from .forms import DataForm
 import json
+import re
 
 from io import BytesIO
 import base64
@@ -220,7 +221,7 @@ def collect_results(request):
 def auto_results(request):
     portal_id = request.POST['portal']
     if int(portal_id) == 1:
-        portal_id = 28
+        portal_id = 30
     if int(portal_id) == -1:
         portal_obj = Sputnik.objects.order_by('pk').first()
         next_id = portal_obj.pk
@@ -278,16 +279,25 @@ def auto_results(request):
     return JsonResponse(response)
 
 def save_collected_data(request):
-    form = "1"
-    portal_id = form.cleaned_data["portal"]
-    portal_row = Sputnik.objects.get(id=portal_id)
-    # print(form.cleaned_data["le_metrics_desktop"])
-    data = Data(
-        dataLEDesktop=form.cleaned_data["le_metrics_desktop"],
-        dataOLEDesktop=form.cleaned_data["ole_metrics_desktop"],
-        dataLEMobile=form.cleaned_data["le_metrics_mobile"],
-        dataOLEMobile=form.cleaned_data["ole_metrics_mobile"],
-        site=portal_row
-    )
-    data.save()
-    return render(request, 'getdata/results.html')
+    portals_str = request.POST['portals']
+    portals_list = portals_str.split()
+    for p in portals_list:
+        portal_row = Sputnik.objects.get(id=int(p))
+        print ("URL: ", portal_row.url)
+        h = re.sub("'", "\"", request.POST['le_metrics_desktop' + p])
+        # hhh = json.loads(request.POST['le_metrics_desktop' + p])
+        hhh = json.loads(h)
+        for key, value in hhh.items():
+            print ("le_metrics_desktop: key:", key, "   value:", value)
+        # data = Data(
+        #     dataLEDesktop = json.loads(request.POST['le_metrics_desktop' + p]),
+        #     dataOLEDesktop = json.loads(request.POST['ole_metrics_desktop' + p]),
+        #     dataLEMobile = json.loads(request.POST['le_metrics_mobile' + p]),
+        #     dataOLEMobile = json.loads(request.POST['ole_metrics_mobile' + p]),
+        #     site=portal_row
+        # )
+        # data.save()
+    response = {
+        "save_status": "true"
+    }
+    return JsonResponse(response)

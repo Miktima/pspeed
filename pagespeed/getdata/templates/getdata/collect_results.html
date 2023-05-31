@@ -29,7 +29,7 @@
                         <input type="hidden" name="le_metrics_mobile_{{portal.id}}" id="lemmobile_{{portal.id}}" value="">
                         <input type="hidden" name="ole_metrics_mobile_{{portal.id}}" id="olemmobile_{{portal.id}}" value="">
                     {% endfor %}
-                    <button class="btn btn-primary" type="submit" id="save_btn">Сохранить данные</button>
+                    <button class="btn btn-primary" type="submit" id="save_btn" disabled>Сохранить данные</button>
                 </form>
                 <script type="text/javascript">
                     var iter = -1;
@@ -58,12 +58,15 @@
                                         $("#mstatus_" + iter).val(response.status);
                                         $("#img_status_" + iter).prop('src', '../../static/getdata/img/check.svg');
                                     }
-                                    if (response.status == "false") {
+                                    else if (response.status == "false") {
                                         $("#img_status_" + iter).prop('src', '../../static/getdata/img/dash-circle.svg');
                                         $("#mstatus_" + iter).val(response.status);
                                     }
                                     if (response.next > 0) {
                                         ajaxFunc(response.next);
+                                    }
+                                    else {
+                                        $("#save_btn").prop('disabled', false);
                                     }
                                 },
                             error: function(xhr, errmsg, err) {
@@ -76,15 +79,16 @@
                         e.preventDefault();
                         var portals = ($("#save_portals").val()).trim();
                         portals = portals.split(" ");
-                        let post_data = {}
+                        let post_data = {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            portals: ($("#save_portals").val()).trim()
+                        }
                         for (const p of portals) {
                             post_data['le_metrics_desktop' + p] = JSON.stringify($("#lemdesktop_" + p).val());
                             post_data['ole_metrics_desktop' + p] = JSON.stringify($("#olemdesktop_" + p).val());
                             post_data['le_metrics_mobile' + p] = JSON.stringify($("#lemmobile_" + p).val());
                             post_data['ole_metrics_mobile' + p] = JSON.stringify($("#olemmobile_" + p).val());
                         }
-                        post_data['csrfmiddlewaretoken'] = '{{ csrf_token }}';
-
                         $.ajax({
                             type:'POST',
                             url:'{% url "save_collected_data" %}',
