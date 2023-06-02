@@ -3,3 +3,6 @@ __pycache__
 __pycache__/
 pagespeed/getdata/config.json
 *.pyc
+.gitsecret/keys/random_seed
+!*.secret
+pagespeed/pagespeed/settings.py
