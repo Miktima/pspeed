@@ -284,7 +284,9 @@ def save_collected_data(request):
     for p in portals_list:
         portal_row = Sputnik.objects.get(id=int(p))
         print ("URL: ", portal_row.url)
-        h = re.sub("'", "\"", request.POST['le_metrics_desktop' + p])
+        print (request.POST['le_metrics_desktop' + p])
+        h = re.sub("\"", "", request.POST['le_metrics_desktop' + p])
+        h = re.sub("'", "\"", h)
         # hhh = json.loads(request.POST['le_metrics_desktop' + p])
         hhh = json.loads(h)
         for key, value in hhh.items():
