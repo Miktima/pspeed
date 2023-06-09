@@ -220,8 +220,6 @@ def collect_results(request):
 
 def auto_results(request):
     portal_id = request.POST['portal']
-    if int(portal_id) == 1:
-        portal_id = 30
     if int(portal_id) == -1:
         portal_obj = Sputnik.objects.order_by('pk').first()
         next_id = portal_obj.pk
@@ -284,21 +282,22 @@ def save_collected_data(request):
     for p in portals_list:
         portal_row = Sputnik.objects.get(id=int(p))
         print ("URL: ", portal_row.url)
-        print (request.POST['le_metrics_desktop' + p])
-        h = re.sub("\"", "", request.POST['le_metrics_desktop' + p])
-        h = re.sub("'", "\"", h)
-        # hhh = json.loads(request.POST['le_metrics_desktop' + p])
-        hhh = json.loads(h)
-        for key, value in hhh.items():
-            print ("le_metrics_desktop: key:", key, "   value:", value)
-        # data = Data(
-        #     dataLEDesktop = json.loads(request.POST['le_metrics_desktop' + p]),
-        #     dataOLEDesktop = json.loads(request.POST['ole_metrics_desktop' + p]),
-        #     dataLEMobile = json.loads(request.POST['le_metrics_mobile' + p]),
-        #     dataOLEMobile = json.loads(request.POST['ole_metrics_mobile' + p]),
-        #     site=portal_row
-        # )
-        # data.save()
+        le_metrics_desktop = json.loads(re.sub("'", "\"", re.sub("\"", "", \
+                                        request.POST['le_metrics_desktop' + p])))
+        ole_metrics_desktop = json.loads(re.sub("'", "\"", re.sub("\"", "", \
+                                        request.POST['ole_metrics_desktop' + p])))
+        le_metrics_mobile = json.loads(re.sub("'", "\"", re.sub("\"", "", \
+                                        request.POST['le_metrics_mobile' + p])))
+        ole_metrics_mobile = json.loads(re.sub("'", "\"", re.sub("\"", "", \
+                                        request.POST['ole_metrics_mobile' + p])))
+        data = Data(
+            dataLEDesktop = le_metrics_desktop,
+            dataOLEDesktop = ole_metrics_desktop,
+            dataLEMobile = le_metrics_mobile,
+            dataOLEMobile = ole_metrics_mobile,
+            site=portal_row
+        )
+        data.save()
     response = {
         "save_status": "true"
     }
