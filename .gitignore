@@ -6,4 +6,5 @@ pagespeed/getdata/config.json
 .gitsecret/keys/random_seed
 !*.secret
 pagespeed/pagespeed/settings.py
-
+pagespeed/pagespeed/secret_key.txt
+pagespeed/static_files/
